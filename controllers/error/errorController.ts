@@ -1,11 +1,12 @@
+import { Request, Response, NextFunction } from "express";
 const AppError = require("../../utils/appError");
 
-const handleCastErrorDB = (err) => {
+const handleCastErrorDB = (err: any) => {
   const message = `Invalid ${err.path}: ${err.value}.`;
   return new AppError(message, 400);
 };
 
-const handleDuplicateFieldsDB = (err) => {
+const handleDuplicateFieldsDB = (err: any) => {
   // Fix: Handle cases where errmsg might be missing
   const messageStr = err.errmsg || err.message;
   const match = messageStr.match(/(["'])(\\?.)*?\1/);
@@ -15,8 +16,8 @@ const handleDuplicateFieldsDB = (err) => {
   return new AppError(message, 400);
 };
 
-const handleValidationErrorDB = (err) => {
-  const errors = Object.values(err.errors).map((el) => el.message);
+const handleValidationErrorDB = (err: any) => {
+  const errors = Object.values(err.errors).map((el: any) => el.message);
   const message = `Invalid input data. ${errors.join(". ")}`;
   return new AppError(message, 400);
 };
@@ -26,7 +27,7 @@ const handleJWTError = () =>
 const handleJWTExpiredError = () =>
   new AppError("Your token has expired!", 401);
 
-const sendErrorDev = (err, req, res) => {
+const sendErrorDev = (err: any, req: Request, res: Response) => {
   if (req.originalUrl.startsWith("/api")) {
     return res.status(err.statusCode).json({
       status: err.status,
@@ -42,7 +43,7 @@ const sendErrorDev = (err, req, res) => {
   });
 };
 
-const sendErrorProd = (err, req, res) => {
+const sendErrorProd = (err: any, req: Request, res: Response) => {
   if (req.originalUrl.startsWith("/api")) {
     if (err.isOperational) {
       return res.status(err.statusCode).json({
@@ -70,7 +71,12 @@ const sendErrorProd = (err, req, res) => {
   });
 };
 
-module.exports = (err, req, res, next) => {
+module.exports = (
+  err: any,
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) => {
   err.statusCode = err.statusCode || 500;
   err.status = err.status || "error";
 
